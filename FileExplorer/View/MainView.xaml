@@ -1,0 +1,104 @@
+﻿<dx:DXTabbedWindow x:Class="FileExplorer.View.MainView"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                   xmlns:dxi="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+                   xmlns:dxt="http://schemas.devexpress.com/winfx/2008/xaml/core/themekeys"                   
+                   xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                   xmlns:common="clr-namespace:FileExplorer.Core"
+                   ShowTitle="False" ShowIcon="False"
+                   HeaderIndentInNormalState="0" HeaderIndentInMaximizedState="0" MinWidth="480" MinHeight="270" Closed="{DXEvent 'SaveSession()'}">
+
+    <dxmvvm:Interaction.Behaviors>
+        <common:ActiveWindowService />
+    </dxmvvm:Interaction.Behaviors>
+
+    <dx:DXTabControl x:Name="TabControl" Padding="0" TabContentCacheMode="CacheAllTabs">
+        <dxmvvm:Interaction.Behaviors>
+            <dx:TabbedWindowDocumentUIService ShowNewItemOnStartup="False" />
+        </dxmvvm:Interaction.Behaviors>
+        <dx:DXTabControl.ItemHeaderTemplate>
+            <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                    <Image Width="16" Height="16" Source="{Binding DataContext.CurrentFolder.SmallIcon, RelativeSource={RelativeSource AncestorType=dx:DXTabItem}}" />
+                    <TextBlock Margin="10,0,0,0" DataContext="{Binding DataContext.CurrentFolder, RelativeSource={RelativeSource AncestorType=dx:DXTabItem}}" Text="{Binding}">
+                        <TextBlock.ToolTip>
+                            <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                <StackPanel Margin="3">
+                                    <TextBlock FontWeight="Medium" Text="{Binding Name}" />
+                                    <TextBlock Margin="0,5,0,0" Text="{Binding FullPath}" />
+                                </StackPanel>
+                            </ToolTip>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
+                </StackPanel>
+            </DataTemplate>
+        </dx:DXTabControl.ItemHeaderTemplate>
+        <dx:DXTabControl.ItemContainerStyle>
+            <Style TargetType="dx:DXTabItem">
+                <Setter Property="Margin" Value="0,6,0,0" />
+                <Setter Property="AllowDrop" Value="True" />
+                <EventSetter Event="DragOver" Handler="OnTabDragOver" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{DXBinding '@s.($dx:LightweightThemeManager.CurrentTheme).Name.Contains(`VS2019Dark`)'}" Value="True">
+                        <Setter Property="SelectedBackgroundTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <dxi:TabBorder ViewInfo="{Binding}" BackgroundMode="BorderBackground" BorderMode="BorderBrush"
+                                                   BorderThickness="1,1,1,0" BorderMargin="0,-1,1,-1" HoldBorderThickness="2" HoldBorderMargin="0,0,2,2"
+                                                   BorderBrush="{DynamicResource {dxt:ThemedWindowThemeKey ResourceKey=WindowActiveContentBorderBrush}}"
+                                                   BorderBackground="{DynamicResource {dxt:ThemedWindowThemeKey ResourceKey=WindowActiveHeaderBackground}}" />
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{DXBinding '@s.($dx:LightweightThemeManager.CurrentTheme).Name.Contains(`Win10`)'}" Value="True">
+                        <Setter Property="SelectedBackgroundTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <dxi:TabBorder ViewInfo="{Binding}" BackgroundMode="BorderBackground" BorderMode="BorderBrush"
+                                                   BorderThickness="1,1,1,0" BorderMargin="0,-1,1,-1" HoldBorderThickness="2" HoldBorderMargin="0,0,2,2"
+                                                   BorderBrush="{DynamicResource {dxt:ThemedWindowThemeKey ResourceKey=WindowActiveContentBorderBrush}}"
+                                                   BorderBackground="{DynamicResource {dxt:ThemedWindowThemeKey ResourceKey=WindowActiveHeaderBackground}}" />
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{DXBinding '@s.($dx:LightweightThemeManager.CurrentTheme).Name.Contains(`Office2019Black`)'}" Value="True">
+                        <Setter Property="SelectedBackgroundTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <dxi:TabBorder ViewInfo="{Binding}" BackgroundMode="BorderBackground" BorderMode="BorderBrush"
+                                                   BorderThickness="1,1,1,0" BorderMargin="0,-1,1,-1" HoldBorderThickness="2" HoldBorderMargin="0,0,2,2"
+                                                   BorderBrush="{DynamicResource {dxt:LWKey FlyoutControl.BorderBrush}}"
+                                                   BorderBackground="{DynamicResource {dxt:LWKey FlyoutControl.Background}}" />
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </dx:DXTabControl.ItemContainerStyle>
+        <dx:DXTabControl.View>
+            <dx:TabControlStretchView HideButtonShowMode="InAllTabs" CloseWindowOnSingleTabItemHiding="True" RemoveTabItemsOnHiding="True"
+                                      DragDropMode="Full" NewButtonShowMode="InTabPanel" NewTabCommand="{Binding CreateNewTabCommand}">
+                <dx:TabControlStretchView.NewTabControlStyle>
+                    <Style TargetType="dx:DXTabControl">
+                        <Setter Property="Padding" Value="0" />
+                    </Style>
+                </dx:TabControlStretchView.NewTabControlStyle>
+            </dx:TabControlStretchView>
+        </dx:DXTabControl.View>
+    </dx:DXTabControl>
+
+    <dx:DXTabbedWindow.InputBindings>
+        <KeyBinding Gesture="Ctrl+T" Command="{Binding CreateNewTabCommand}" />
+        <KeyBinding Gesture="Ctrl+W" Command="{DXCommand '@ElementName(TabControl).SelectedItem.Close()'}" />
+        <KeyBinding Gesture="Alt+Left" Command="{Binding SelectedItemContent.DataContext.MoveBackCommand, ElementName=TabControl}" />
+        <KeyBinding Gesture="Alt+Right" Command="{Binding SelectedItemContent.DataContext.MoveNextCommand, ElementName=TabControl}" />
+        <KeyBinding Gesture="Alt+Up" Command="{Binding SelectedItemContent.DataContext.MoveUpCommand, ElementName=TabControl}" />
+        <KeyBinding Gesture="Ctrl+R" Command="{Binding SelectedItemContent.DataContext.RefreshCommand, ElementName=TabControl}" />
+        <KeyBinding Key="F5" Command="{Binding SelectedItemContent.DataContext.RefreshCommand, ElementName=TabControl}" />
+    </dx:DXTabbedWindow.InputBindings>
+
+</dx:DXTabbedWindow>
